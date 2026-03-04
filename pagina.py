@@ -7,8 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1hoysh9Ju4LeigUt57qxAwRa7VbKMjvg6
 """
 
-!pip install streamlit
-!pip install pyngrok
 
 from google.colab import drive
 drive.mount('/content/drive')
