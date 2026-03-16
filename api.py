@@ -136,7 +136,7 @@ tabs = st.tabs([
     "Información general",
     "Requisitos técnicos",
     "Gestión hospitalaria",
-    "Normativa"
+    "Información Normativa"
 ])
 
 # ---------------------------------
@@ -144,6 +144,9 @@ tabs = st.tabs([
 # ---------------------------------
 
 with tabs[0]:
+
+    if "codigo_gmdn" in ficha:
+        st.info(f"**Código GMDN:** {ficha['codigo_gmdn']}")
 
     if "definicion" in ficha:
         st.markdown(f"**Definición:** {ficha['definicion']}")
