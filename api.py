@@ -119,15 +119,19 @@ df = cargar_datos()
 # SELECTOR EQUIPO
 # ---------------------------------
 
-st.subheader("Seleccione un equipo")
+st.subheader("Buscar equipo biomédico")
 
 equipo = st.selectbox(
-    "",
-    sorted(df["nombre"].dropna().unique())
+    "Escriba el nombre del equipo",
+    sorted(df["nombre"].dropna().unique()),
+    index=None,
+    placeholder="Comience a escribir para buscar..."
 )
 
-ficha = df[df["nombre"] == equipo].iloc[0]
+if equipo is None:
+    st.stop()
 
+ficha = df[df["nombre"] == equipo].iloc[0]
 # ---------------------------------
 # PESTAÑAS
 # ---------------------------------
