@@ -20,11 +20,93 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Guía Interactiva de Especificaciones Técnicas de Equipos Biomédicos")
+# ---------------------------------
+# ESTILO VISUAL (Gobernación Antioquia)
+# ---------------------------------
 
-st.markdown(
-    "Plataforma digital para consulta estructurada de equipos biomédicos."
-)
+st.markdown("""
+<style>
+
+body{
+background-color:#f5f7f6;
+}
+
+.main-title{
+font-size:42px;
+font-weight:700;
+text-align:center;
+color:#006837;
+}
+
+.subtitle{
+font-size:18px;
+text-align:center;
+color:#6c757d;
+margin-bottom:30px;
+}
+
+.equipo-box{
+background-color:white;
+padding:20px;
+border-radius:12px;
+text-align:center;
+font-size:28px;
+font-weight:600;
+border-left:6px solid #006837;
+margin-bottom:25px;
+}
+
+.card{
+background-color:white;
+padding:18px;
+border-radius:10px;
+border-left:5px solid #006837;
+margin-bottom:15px;
+}
+
+.card-title{
+font-weight:600;
+font-size:18px;
+color:#006837;
+margin-bottom:5px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------
+# ENCABEZADO
+# ---------------------------------
+
+logo_url = "https://upload.wikimedia.org/wikipedia/commons/5/5f/Gobernaci%C3%B3n_de_Antioquia_logo.png"
+
+st.markdown(f"""
+<div style="
+background-color:#006837;
+padding:25px;
+border-radius:12px;
+display:flex;
+align-items:center;
+gap:20px;
+margin-bottom:30px;
+">
+
+<img src="{logo_url}" width="120">
+
+<div style="color:white">
+
+<div style="font-size:34px;font-weight:700;">
+Guía Interactiva de Especificaciones Técnicas de Equipos Biomédicos
+</div>
+
+<div style="font-size:16px;">
+Secretaría Seccional de Salud y Protección Social de Antioquia
+</div>
+
+</div>
+
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------
 # LIMPIEZA DE COLUMNAS
@@ -43,6 +125,7 @@ def limpiar(texto):
 # ---------------------------------
 
 def formatear_lista(texto):
+
     if pd.isna(texto):
         return ""
 
@@ -50,6 +133,7 @@ def formatear_lista(texto):
     resultado = []
 
     for linea in lineas:
+
         linea = linea.strip()
         linea = re.sub(r'^\d+\.\s*', '', linea)
 
@@ -73,6 +157,7 @@ def formatear_normas(texto):
 
     for p in partes[1:]:
         p = p.strip().replace("\n", " ")
+
         if p:
             bullets.append(f"- {p}")
 
@@ -91,17 +176,20 @@ def formatear_servicios(texto):
     bullets = []
 
     for p in partes[1:]:
+
         p = p.strip()
+
         if p:
             bullets.append(f"- {p}")
 
     return intro + "\n\n" + "\n".join(bullets)
 
 # ---------------------------------
-# CARGAR DATOS (Google Sheets)
+# CARGAR DATOS
 # ---------------------------------
 
 @st.cache_data(ttl=60)
+
 def cargar_datos():
 
     url = "https://docs.google.com/spreadsheets/d/1Hav7p3RYY0FjdN3ztwo-4mWa382xPzpqZDHpwZGmXok/export?format=csv"
@@ -116,31 +204,48 @@ def cargar_datos():
 df = cargar_datos()
 
 # ---------------------------------
-# SELECTOR EQUIPO
+# BUSCADOR
 # ---------------------------------
 
 st.subheader("Buscar equipo biomédico")
 
 equipo = st.selectbox(
-    "Escriba el nombre del equipo",
+
+    "Comience a escribir el nombre del equipo",
+
     sorted(df["nombre"].dropna().unique()),
+
     index=None,
-    placeholder="Comience a escribir para buscar..."
+
+    placeholder="Ej: Centrífuga, Agitador, Electrocardiógrafo..."
+
 )
 
 if equipo is None:
     st.stop()
 
 ficha = df[df["nombre"] == equipo].iloc[0]
+
+# ---------------------------------
+# TARJETA EQUIPO
+# ---------------------------------
+
+st.markdown(
+    f'<div class="equipo-box">{equipo}</div>',
+    unsafe_allow_html=True
+)
+
 # ---------------------------------
 # PESTAÑAS
 # ---------------------------------
 
 tabs = st.tabs([
-    "Información general",
-    "Requisitos técnicos",
-    "Gestión hospitalaria",
-    "Información Normativa"
+
+    "📄 Información general",
+    "⚙️ Requisitos técnicos",
+    "🏥 Gestión hospitalaria",
+    "📑 Información normativa"
+
 ])
 
 # ---------------------------------
@@ -150,19 +255,27 @@ tabs = st.tabs([
 with tabs[0]:
 
     if "codigo_gmdn" in ficha:
-        st.info(f"**Código GMDN:** {ficha['codigo_gmdn']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Código GMDN</div>{ficha["codigo_gmdn"]}</div>',
+        unsafe_allow_html=True)
 
     if "definicion" in ficha:
-        st.markdown(f"**Definición:** {ficha['definicion']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Definición</div>{ficha["definicion"]}</div>',
+        unsafe_allow_html=True)
 
     if "finalidad_clinica" in ficha:
-        st.markdown(f"**Finalidad clínica:** {ficha['finalidad_clinica']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Finalidad clínica</div>{ficha["finalidad_clinica"]}</div>',
+        unsafe_allow_html=True)
 
     if "servicios" in ficha:
+
+        servicios = formatear_servicios(ficha["servicios"])
+
         st.markdown(
-            "**Servicios:**\n\n" +
-            formatear_servicios(ficha["servicios"])
-        )
+        f'<div class="card"><div class="card-title">Servicios</div>{servicios}</div>',
+        unsafe_allow_html=True)
 
 # ---------------------------------
 # REQUISITOS TÉCNICOS
@@ -171,18 +284,22 @@ with tabs[0]:
 with tabs[1]:
 
     if "especificaciones_tecnicas" in ficha:
+
+        texto = formatear_lista(ficha["especificaciones_tecnicas"])
+
         st.markdown(
-            "**Especificaciones técnicas:**\n\n" +
-            formatear_lista(ficha["especificaciones_tecnicas"])
-        )
+        f'<div class="card"><div class="card-title">Especificaciones técnicas</div>{texto}</div>',
+        unsafe_allow_html=True)
 
     if "preinstalacion" in ficha:
-        st.markdown(f"**Preinstalación:** {ficha['preinstalacion']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Preinstalación</div>{ficha["preinstalacion"]}</div>',
+        unsafe_allow_html=True)
 
     if "accesorios_consumibles_y_repuestos" in ficha:
         st.markdown(
-            f"**Accesorios, consumibles y repuestos:** {ficha['accesorios_consumibles_y_repuestos']}"
-        )
+        f'<div class="card"><div class="card-title">Accesorios, consumibles y repuestos</div>{ficha["accesorios_consumibles_y_repuestos"]}</div>',
+        unsafe_allow_html=True)
 
 # ---------------------------------
 # GESTIÓN HOSPITALARIA
@@ -191,13 +308,19 @@ with tabs[1]:
 with tabs[2]:
 
     if "entrenamiento" in ficha:
-        st.markdown(f"**Entrenamiento:** {ficha['entrenamiento']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Entrenamiento</div>{ficha["entrenamiento"]}</div>',
+        unsafe_allow_html=True)
 
     if "garantia" in ficha:
-        st.markdown(f"**Garantía:** {ficha['garantia']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Garantía</div>{ficha["garantia"]}</div>',
+        unsafe_allow_html=True)
 
     if "mantenimiento" in ficha:
-        st.markdown(f"**Mantenimiento:** {ficha['mantenimiento']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Mantenimiento</div>{ficha["mantenimiento"]}</div>',
+        unsafe_allow_html=True)
 
 # ---------------------------------
 # NORMATIVA
@@ -206,21 +329,27 @@ with tabs[2]:
 with tabs[3]:
 
     if "documentacion" in ficha:
+
+        texto = formatear_normas(ficha["documentacion"])
+
         st.markdown(
-            "**Documentación:**\n\n" +
-            formatear_normas(ficha["documentacion"])
-        )
+        f'<div class="card"><div class="card-title">Documentación</div>{texto}</div>',
+        unsafe_allow_html=True)
 
     if "normas_para_el_fabricante" in ficha:
-        st.markdown(f"**Normas fabricante:** {ficha['normas_para_el_fabricante']}")
+        st.markdown(
+        f'<div class="card"><div class="card-title">Normas para el fabricante</div>{ficha["normas_para_el_fabricante"]}</div>',
+        unsafe_allow_html=True)
 
     if "normas_para_el_producto" in ficha:
+
+        texto = formatear_normas(ficha["normas_para_el_producto"])
+
         st.markdown(
-            "**Normas producto:**\n\n" +
-            formatear_normas(ficha["normas_para_el_producto"])
-        )
+        f'<div class="card"><div class="card-title">Normas para el producto</div>{texto}</div>',
+        unsafe_allow_html=True)
 
     if "normas_sobre_la_validacion_clinica" in ficha:
         st.markdown(
-            f"**Validación clínica:** {ficha['normas_sobre_la_validacion_clinica']}"
-        )
+        f'<div class="card"><div class="card-title">Validación clínica</div>{ficha["normas_sobre_la_validacion_clinica"]}</div>',
+        unsafe_allow_html=True)
